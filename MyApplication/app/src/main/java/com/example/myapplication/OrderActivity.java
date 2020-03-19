@@ -21,6 +21,7 @@ import com.example.myapplication.adapter.MenuItemAdapter;
 import com.example.myapplication.adapter.OrderAdapter;
 import com.example.myapplication.model.MenuItem;
 import com.example.myapplication.model.OrderMenuItem;
+import com.example.myapplication.model.OrderPaymentItem;
 import com.example.myapplication.service.MenuItemService;
 import com.example.myapplication.service.OrderService;
 import com.example.myapplication.service.PaymentService;
@@ -40,6 +41,9 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class OrderActivity extends AppCompatActivity {
     private ListView listView;
@@ -68,8 +72,14 @@ public class OrderActivity extends AppCompatActivity {
                         bar.setVisibility(View.VISIBLE);
                         getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
                                 WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-                        SubmitRestToPayment submitPayment = new SubmitRestToPayment();
-                        submitPayment.execute();
+                        if (OrderService.isPayAllItem()) {
+                            SubmitRestToPayment submitPayment = new SubmitRestToPayment();
+                            submitPayment.execute();
+                        } else {
+                            SubmitPartialToPayment submitPayment = new SubmitPartialToPayment();
+                            submitPayment.execute();
+                        }
+
                         break;
 
                     case DialogInterface.BUTTON_NEGATIVE:
@@ -98,10 +108,12 @@ public class OrderActivity extends AppCompatActivity {
                 }
 
                 if (isAllItem) {
+                    OrderService.setPayAllItem(true);
                     AlertDialog.Builder builder = new AlertDialog.Builder(this);
                     builder.setMessage("Would you like to pay for all the items now?").setPositiveButton("Yes", dialogClickListener)
                             .setNegativeButton("No", dialogClickListener).show();
                 } else {
+                    OrderService.setPayAllItem(false);
                     AlertDialog.Builder builder = new AlertDialog.Builder(this);
                     builder.setMessage("Would you like to pay for the selected items now?").setPositiveButton("Yes", dialogClickListener)
                             .setNegativeButton("No", dialogClickListener).show();
@@ -141,6 +153,106 @@ public class OrderActivity extends AppCompatActivity {
 
                 OutputStreamWriter wr = new OutputStreamWriter(con.getOutputStream());
                 wr.write(json.toString());
+                wr.flush();
+
+                try(BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream(), "utf-8"))) {
+                    StringBuilder sb = new StringBuilder();
+                    String responseLine = null;
+                    while ((responseLine = br.readLine()) != null) {
+                        sb.append(responseLine.trim());
+                    }
+                    response = sb.toString();
+
+                    JSONObject obj = new JSONObject(response);
+                    if (obj.getString("result").equals("OK")) {
+                        PaymentService.setPaymentId(obj.getString("paymentId"));
+                        PaymentService.setPaymentLinkQR(obj.getString("paymentLinkQR"));
+                        PaymentService.setAmount(obj.getDouble("amount"));
+                        return "OK";
+                    } else if (obj.getString("result").equals("PAID")) {
+                        return "PAID";
+                    } else if (obj.getString("result").equals("PAID_OR_EXPIRED")) {
+                        return "PAID_EXPIRED";
+                    } else {
+                        return null;
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                return null;
+            } catch (NetworkOnMainThreadException e) {
+                e.printStackTrace();
+                return null;
+            } catch (JSONException e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
+
+        @Override
+        protected void onPostExecute(String message) {
+            bar.setVisibility(View.GONE);
+            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+            if (message.equals("PAID")) {
+                finish();
+                Toast toast = Toast.makeText(getApplicationContext(), "Order has already been paid.", Toast.LENGTH_SHORT);
+                toast.show();
+            } else if (message.equals("PAID_OR_EXPIRED")) {
+                finish();
+                Toast toast = Toast.makeText(getApplicationContext(), "Order has expired.", Toast.LENGTH_SHORT);
+                toast.show();
+            } else if (message.equals("OK")) {
+                finish();
+                try {
+                    InputStream is = null;
+                    is = (InputStream) new URL(PaymentService.getPaymentLinkQR()).getContent();
+                    PaymentService.setPaymentQRDrawable(Drawable.createFromStream(is, "src name"));
+                    Intent intent = new Intent(OrderActivity.this, PaymentQR.class);
+                    startActivity(intent);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    private class SubmitPartialToPayment extends AsyncTask<String, Void, String> {
+        @Override
+        protected String doInBackground(String[] params) {
+            String response = null;
+            URL url = null;
+            try {
+                url = new URL("https://fyp.amazecraft.net/Api/Payment/PaySelectiveByOrderItemId");
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            }
+
+            try {
+                HttpURLConnection con = (HttpURLConnection) url.openConnection();
+                con.setRequestMethod("POST");
+                con.setRequestProperty("Content-Type", "application/json");
+                con.setRequestProperty("Accept", "application/json");
+                con.setDoInput(true);
+
+                Set<JSONObject> paymentItems = new HashSet<>();
+
+                for (int i = 0; i < aAdapter.getCount(); i++) {
+                    OrderMenuItem objItem = (OrderMenuItem) aAdapter.getItem(i);
+                    if (objItem.getSelectedQuantity() != 0) {
+                        JSONObject newObj = new JSONObject();
+                        newObj.put("orderItemId", objItem.getItemId());
+                        newObj.put("quantity", objItem.getSelectedQuantity());
+                        paymentItems.add(newObj);
+                    }
+                }
+                JSONObject json = new JSONObject();
+                json.put("orderId", OrderService.getOrderId());
+                json.put("orderItems", paymentItems);
+
+                OutputStreamWriter wr = new OutputStreamWriter(con.getOutputStream());
+                String newJson = json.toString().replace("\"[", "[").replace("]\"", "]").replace("\\\"", "\"");
+
+                wr.write(newJson.toString());
                 wr.flush();
 
                 try(BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream(), "utf-8"))) {

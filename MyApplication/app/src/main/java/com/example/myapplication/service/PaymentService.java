@@ -8,6 +8,7 @@ public class PaymentService {
     private static Drawable paymentQRDrawable;
     private static double amount;
     private static boolean fullyPaid = false;
+    private static boolean paymentDone = false;
 
     public static String getPaymentId() {
         return paymentId;
@@ -47,5 +48,13 @@ public class PaymentService {
 
     public static void setFullyPaid(boolean fullyPaid) {
         PaymentService.fullyPaid = fullyPaid;
+    }
+
+    public static boolean isPaymentDone() {
+        return paymentDone;
+    }
+
+    public static void setPaymentDone(boolean paymentDone) {
+        PaymentService.paymentDone = paymentDone;
     }
 }

@@ -10,6 +10,7 @@ public class OrderService {
     private static String orderId = null;
     private static boolean initiatedOrder = false;
     private static List<OrderMenuItem> items = new ArrayList<OrderMenuItem>();
+    private static boolean payAllItem = true;
 
     public static boolean isInitiatedOrder() {
         return initiatedOrder;
@@ -41,5 +42,13 @@ public class OrderService {
 
     public static void clearOrder() {
         items = new ArrayList<OrderMenuItem>();
+    }
+
+    public static boolean isPayAllItem() {
+        return payAllItem;
+    }
+
+    public static void setPayAllItem(boolean payAllItem) {
+        OrderService.payAllItem = payAllItem;
     }
 }

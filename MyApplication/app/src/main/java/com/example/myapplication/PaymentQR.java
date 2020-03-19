@@ -50,6 +50,7 @@ public class PaymentQR extends AppCompatActivity {
         cancelBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                PaymentService.setPaymentDone(true);
                 timer.cancel();
                 if (PaymentService.isFullyPaid()) {
                     Intent intent = new Intent(PaymentQR.this, MainInit.class);
@@ -67,54 +68,59 @@ public class PaymentQR extends AppCompatActivity {
                 captureStatus.execute(SessionService.getCaptureId());
             }
         };
-        timer.scheduleAtFixedRate(task, 2000,500);
+        PaymentService.setPaymentDone(false);
+        timer.scheduleAtFixedRate(task, 3000,500);
     }
 
     private class CheckCaptureStatus extends AsyncTask<String, Void, String> {
         @Override
         protected String doInBackground(String[] params) {
-            // HTTPPOST to API
-            Log.i("Test", "testing");
+            if (!PaymentService.isPaymentDone()) {
+                // HTTPPOST to API
+                Log.i("Test", "testing");
 
-            String response = null;
-            URL url = null;
-            try {
-                url = new URL("https://fyp.amazecraft.net/Api/Payment/CheckPaypalOrder");
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            }
-
-            try {
-                HttpURLConnection con = (HttpURLConnection) url.openConnection();
-                con.setRequestMethod("POST");
-                con.setRequestProperty("Content-Type", "application/json");
-                con.setRequestProperty("Accept", "application/json");
-                con.setDoInput(true);
-
-                JSONObject json = new JSONObject();
-                json.put("paymentId", PaymentService.getPaymentId());
-
-                OutputStreamWriter wr = new OutputStreamWriter(con.getOutputStream());
-                wr.write(json.toString());
-                wr.flush();
-
-                try(BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream(), "utf-8"))) {
-                    StringBuilder sb = new StringBuilder();
-                    String responseLine = null;
-                    while ((responseLine = br.readLine()) != null) {
-                        sb.append(responseLine.trim());
-                    }
-                    response = sb.toString();
+                String response = null;
+                URL url = null;
+                try {
+                    url = new URL("https://fyp.amazecraft.net/Api/Payment/CheckPaypalOrder");
+                } catch (MalformedURLException e) {
+                    e.printStackTrace();
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (NetworkOnMainThreadException e) {
-                e.printStackTrace();
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
 
-            return response;
+                try {
+                    HttpURLConnection con = (HttpURLConnection) url.openConnection();
+                    con.setRequestMethod("POST");
+                    con.setRequestProperty("Content-Type", "application/json");
+                    con.setRequestProperty("Accept", "application/json");
+                    con.setDoInput(true);
+
+                    JSONObject json = new JSONObject();
+                    json.put("paymentId", PaymentService.getPaymentId());
+
+                    OutputStreamWriter wr = new OutputStreamWriter(con.getOutputStream());
+                    wr.write(json.toString());
+                    wr.flush();
+
+                    try(BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream(), "utf-8"))) {
+                        StringBuilder sb = new StringBuilder();
+                        String responseLine = null;
+                        while ((responseLine = br.readLine()) != null) {
+                            sb.append(responseLine.trim());
+                        }
+                        response = sb.toString();
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (NetworkOnMainThreadException e) {
+                    e.printStackTrace();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+                return response;
+            } else {
+                return null;
+            }
         }
 
         @Override
