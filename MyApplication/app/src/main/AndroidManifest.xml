@@ -11,9 +11,11 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <activity android:name=".PaymentQR"
+            android:label="Order Payment"></activity>
         <activity
             android:name=".OrderActivity"
-            android:label="Order Summary"></activity>
+            android:label="Order Summary" />
         <activity
             android:name=".MainActivityMember"
             android:label="Member" />

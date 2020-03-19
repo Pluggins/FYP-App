@@ -15,7 +15,13 @@ public class CartService {
         for (CartItem item : itemList) {
             if (!changed) {
                 if (item.getMenuItem().getId().equals(menuItem.getId())) {
-                    item.setQuantity(item.getQuantity() + quantity);
+                    int endQuantity = item.getQuantity() + quantity;
+                    if (endQuantity < 0) {
+                        item.setQuantity(0);
+                    } else {
+                        item.setQuantity(item.getQuantity() + quantity);
+                    }
+
                     changed = true;
                 }
             }
@@ -24,7 +30,11 @@ public class CartService {
         if (!changed) {
             CartItem newItem = new CartItem();
             newItem.setMenuItem(menuItem);
-            newItem.setQuantity(quantity);
+            if (quantity < 0) {
+                newItem.setQuantity(0);
+            } else {
+                newItem.setQuantity(quantity);
+            }
 
             itemList.add(newItem);
         }

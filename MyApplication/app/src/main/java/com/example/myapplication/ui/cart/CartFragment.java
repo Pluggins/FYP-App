@@ -211,12 +211,14 @@ public class CartFragment extends Fragment {
             for (CartItem item : cartItems) {
                 JSONObject newObj = new JSONObject();
                 try {
-                    newObj.put("itemId", item.getMenuItem().getId());
-                    newObj.put("quantity", item.getQuantity());
+                    if (item.getQuantity() != 0) {
+                        newObj.put("itemId", item.getMenuItem().getId());
+                        newObj.put("quantity", item.getQuantity());
+                        orderMenuItems.add(newObj);
+                    }
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-                orderMenuItems.add(newObj);
             }
 
             String response = null;

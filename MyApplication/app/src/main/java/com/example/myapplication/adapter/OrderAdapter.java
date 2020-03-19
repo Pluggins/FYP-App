@@ -92,15 +92,20 @@ public class OrderAdapter extends ArrayAdapter<OrderMenuItem> {
                 alert.setView(input);
                 alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
-                        if (Integer.parseInt(input.getText().toString()) <= orderItem.getQuantity() && Integer.parseInt(input.getText().toString()) >= 0) {
-                            orderItemQuantity.setText(String.valueOf(orderItem.getQuantity()) + " ("+input.getText().toString()+")");
-                            orderItem.setSelectedQuantity(Integer.parseInt(input.getText().toString()));
-                        } else if (Integer.parseInt(input.getText().toString()) < 0) {
+                        try {
+                            if (Integer.parseInt(input.getText().toString()) <= orderItem.getQuantity() && Integer.parseInt(input.getText().toString()) >= 0) {
+                                orderItemQuantity.setText(String.valueOf(orderItem.getQuantity()) + " ("+input.getText().toString()+")");
+                                orderItem.setSelectedQuantity(Integer.parseInt(input.getText().toString()));
+                            } else if (Integer.parseInt(input.getText().toString()) < 0) {
+                                orderItemQuantity.setText(String.valueOf(orderItem.getQuantity()) + " (0)");
+                                orderItem.setSelectedQuantity(0);
+                            } else {
+                                orderItemQuantity.setText(String.valueOf(orderItem.getQuantity()) + " ("+orderItem.getQuantity()+")");
+                                orderItem.setSelectedQuantity(orderItem.getQuantity());
+                            }
+                        } catch (NumberFormatException e) {
                             orderItemQuantity.setText(String.valueOf(orderItem.getQuantity()) + " (0)");
                             orderItem.setSelectedQuantity(0);
-                        } else {
-                            orderItemQuantity.setText(String.valueOf(orderItem.getQuantity()) + " ("+orderItem.getQuantity()+")");
-                            orderItem.setSelectedQuantity(orderItem.getQuantity());
                         }
 
                         /*
