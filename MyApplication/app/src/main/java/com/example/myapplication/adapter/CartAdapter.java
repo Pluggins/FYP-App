@@ -61,7 +61,7 @@ public class CartAdapter extends ArrayAdapter<CartItem> {
             txtId.setText(cartItem.getMenuItem().getId());
             txtName.setText(cartItem.getMenuItem().getName());
             txtPrice.setText(cartItem.getMenuItem().getPrice().toString());
-            txtTotal.setText(String.valueOf(cartItem.getMenuItem().getPrice().doubleValue() * cartItem.getQuantity()));
+            txtTotal.setText("RM"+String.format("%.2f",cartItem.getMenuItem().getPrice().doubleValue() * cartItem.getQuantity()));
             txtQuantity.setText(String.valueOf(cartItem.getQuantity()));
         }
         v.setOnClickListener(new View.OnClickListener(){

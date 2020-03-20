@@ -7,6 +7,7 @@ public class MenuItem {
     private String name;
     private String shortDesc;
     private BigDecimal price;
+    private String displayPrice;
 
     public String getId() {
         return id;
@@ -38,5 +39,13 @@ public class MenuItem {
 
     public void setPrice(BigDecimal price) {
         this.price = price;
+    }
+
+    public String getDisplayPrice() {
+        return displayPrice;
+    }
+
+    public void setDisplayPrice(String displayPrice) {
+        this.displayPrice = displayPrice;
     }
 }

@@ -46,7 +46,7 @@ public class MenuItemAdapter extends ArrayAdapter<MenuItem> {
             txtId.setText(menuItem.getId());
             txtName.setText(menuItem.getName());
             txtDesc.setText(menuItem.getShortDesc());
-            txtPrice.setText(menuItem.getPrice().toString());
+            txtPrice.setText(menuItem.getDisplayPrice());
         }
 
         v.setOnClickListener(new View.OnClickListener(){

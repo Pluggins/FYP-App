@@ -152,6 +152,7 @@ public class MenuAdapter extends ArrayAdapter<Menu> {
                         newMenuItem.setName(tmpObj.getString("name"));
                         newMenuItem.setShortDesc(tmpObj.getString("shortDesc"));
                         newMenuItem.setPrice(BigDecimal.valueOf(Double.parseDouble(tmpObj.getString("price"))));
+                        newMenuItem.setDisplayPrice(tmpObj.getString("displayPrice"));
                         MenuItemService.addMenuItem(newMenuItem);
                     }
 

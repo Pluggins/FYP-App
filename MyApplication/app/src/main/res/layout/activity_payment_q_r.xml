@@ -46,21 +46,33 @@
         android:text="@android:string/cancel"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/paymentQRImg"
-        app:layout_constraintVertical_bias="0.65" />
+        app:layout_constraintVertical_bias="0.696" />
+
+    <Button
+        android:id="@+id/membershipBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Capture Details"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@+id/qrPaymentCancelBtn"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/paymentQRImg"
+        app:layout_constraintVertical_bias="0.79" />
 
     <TextView
         android:id="@+id/qrPayAmount"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="44dp"
+        android:layout_width="275dp"
+        android:layout_height="234dp"
         android:text="RM 10"
+        android:textAlignment="center"
         android:textSize="36sp"
-        app:layout_constraintBottom_toTopOf="@+id/paymentQRImg"
+        app:layout_constraintBottom_toTopOf="@+id/qrPaymentCancelBtn"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/paymentInst2"
+        app:layout_constraintVertical_bias="0.138" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

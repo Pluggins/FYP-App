@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.NetworkOnMainThreadException;
 import android.view.LayoutInflater;
@@ -47,8 +48,7 @@ public class OrderAdapter extends ArrayAdapter<OrderMenuItem> {
     public OrderAdapter(ArrayList<OrderMenuItem> data, Context context) {
         super(context, R.layout.listrow_order, data);
         this.dataSet = data;
-        this.mContext=context;
-
+        this.mContext = context;
     }
 
     @Override
@@ -71,12 +71,16 @@ public class OrderAdapter extends ArrayAdapter<OrderMenuItem> {
             txtSelectedQuantity.setText("0");
             txtItemQuantity.setText(String.valueOf(orderItem.getQuantity()));
             txtItemName.setText(orderItem.getItemName());
-            txtItemUnitPrice.setText("Unit Price: " + String.valueOf(orderItem.getUnitPrice()));
+            txtItemUnitPrice.setText("Unit Price: RM" + String.format("%.2f", orderItem.getUnitPrice()));
+            if (orderItem.getStatus() == 2) {
+                v.setBackgroundColor(Color.parseColor("#34eb9e"));
+            }
         }
         v.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view) {
-                final TextView orderItemQuantity = (TextView) view.findViewById(R.id.orderItemQuantity);
+                if (orderItem.getStatus() == 1) {
+                    final TextView orderItemQuantity = (TextView) view.findViewById(R.id.orderItemQuantity);
                 /*
                 ((Activity) mContext).getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
                         WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
@@ -84,45 +88,45 @@ public class OrderAdapter extends ArrayAdapter<OrderMenuItem> {
                 pb.setVisibility(View.VISIBLE);
                 */
 
-                AlertDialog.Builder alert = new AlertDialog.Builder((Activity) mContext);
+                    AlertDialog.Builder alert = new AlertDialog.Builder((Activity) mContext);
 
-                alert.setTitle("Set Quantity");
-                alert.setMessage("Please input the quantity to pay.");
-                final EditText input = new EditText((Activity)mContext);
-                alert.setView(input);
-                alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        try {
-                            if (Integer.parseInt(input.getText().toString()) <= orderItem.getQuantity() && Integer.parseInt(input.getText().toString()) >= 0) {
-                                orderItemQuantity.setText(String.valueOf(orderItem.getQuantity()) + " ("+input.getText().toString()+")");
-                                orderItem.setSelectedQuantity(Integer.parseInt(input.getText().toString()));
-                            } else if (Integer.parseInt(input.getText().toString()) < 0) {
+                    alert.setTitle("Set Quantity");
+                    alert.setMessage("Please input the quantity to pay.");
+                    final EditText input = new EditText((Activity)mContext);
+                    alert.setView(input);
+                    alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int whichButton) {
+                            try {
+                                if (Integer.parseInt(input.getText().toString()) <= orderItem.getQuantity() && Integer.parseInt(input.getText().toString()) >= 0) {
+                                    orderItemQuantity.setText(String.valueOf(orderItem.getQuantity()) + " ("+input.getText().toString()+")");
+                                    orderItem.setSelectedQuantity(Integer.parseInt(input.getText().toString()));
+                                } else if (Integer.parseInt(input.getText().toString()) < 0) {
+                                    orderItemQuantity.setText(String.valueOf(orderItem.getQuantity()) + " (0)");
+                                    orderItem.setSelectedQuantity(0);
+                                } else {
+                                    orderItemQuantity.setText(String.valueOf(orderItem.getQuantity()) + " ("+orderItem.getQuantity()+")");
+                                    orderItem.setSelectedQuantity(orderItem.getQuantity());
+                                }
+                            } catch (NumberFormatException e) {
                                 orderItemQuantity.setText(String.valueOf(orderItem.getQuantity()) + " (0)");
                                 orderItem.setSelectedQuantity(0);
-                            } else {
-                                orderItemQuantity.setText(String.valueOf(orderItem.getQuantity()) + " ("+orderItem.getQuantity()+")");
-                                orderItem.setSelectedQuantity(orderItem.getQuantity());
                             }
-                        } catch (NumberFormatException e) {
-                            orderItemQuantity.setText(String.valueOf(orderItem.getQuantity()) + " (0)");
-                            orderItem.setSelectedQuantity(0);
-                        }
 
                         /*
                         items.set(pos, input.getText().toString());
                         adapterObject.notifyDataSetChanged();  // the adapter you set in the listView.setAdapter();
 
                          */
-                    }
-                });
-                alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        // Canceled.
-                    }
-                });
+                        }
+                    });
+                    alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int whichButton) {
+                            // Canceled.
+                        }
+                    });
 
 
-                alert.show();
+                    alert.show();
                 /*
                 TextView txtId = view.findViewById(R.id.menuId);
                 OrderAdapter.LoadMenuItem loadMenuItem = new OrderAdapter.LoadMenuItem();
@@ -130,7 +134,8 @@ public class OrderAdapter extends ArrayAdapter<OrderMenuItem> {
 
                  */
 
-                //MenuItemService.addMenuItem();
+                    //MenuItemService.addMenuItem();
+                }
             }
         });
 

@@ -3,9 +3,11 @@ package com.example.myapplication;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.NetworkOnMainThreadException;
+import android.se.omapi.Session;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -20,6 +22,7 @@ import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
@@ -35,6 +38,7 @@ public class PaymentQR extends AppCompatActivity {
     private Timer timer;
     private TextView paymentInst;
     private TextView paymentInst2;
+    private Button captureDetailBtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,9 +48,10 @@ public class PaymentQR extends AppCompatActivity {
         qrImg.setImageDrawable(PaymentService.getPaymentQRDrawable());
         cancelBtn = (Button) findViewById(R.id.qrPaymentCancelBtn);
         txtAmount = (TextView) findViewById(R.id.qrPayAmount);
-        txtAmount.setText(String.valueOf("RM"+PaymentService.getAmount()));
+        txtAmount.setText(String.valueOf("RM"+String.format("%.2f", PaymentService.getAmount())));
         paymentInst = (TextView) findViewById(R.id.paymentInst);
         paymentInst2 = (TextView) findViewById(R.id.paymentInst2);
+        captureDetailBtn = (Button) findViewById(R.id.membershipBtn);
         cancelBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -59,6 +64,15 @@ public class PaymentQR extends AppCompatActivity {
                 } else {
                     onBackPressed();
                 }
+            }
+        });
+        captureDetailBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                PaymentService.setPaymentDone(true);
+                timer.cancel();
+                GenerateMemberQR generateQR = new GenerateMemberQR();
+                generateQR.execute();
             }
         });
         timer = new Timer();
@@ -136,6 +150,12 @@ public class PaymentQR extends AppCompatActivity {
                             paymentInst.setText("Payment Received!");
                             paymentInst2.setText("Your order is now closed.");
                             qrImg.setVisibility(View.INVISIBLE);
+                            if (!SessionService.isMember()) {
+                                txtAmount.setText("Would you like to save your order details to your phone for future reference?");
+                                captureDetailBtn.setVisibility(View.VISIBLE);
+                            } else {
+                                txtAmount.setVisibility(View.INVISIBLE);
+                            }
                             cancelBtn.setText("Done");
                         } else {
                             paymentInst.setText("Payment Received!");
@@ -145,6 +165,77 @@ public class PaymentQR extends AppCompatActivity {
                         }
                     }
                 } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    private class GenerateMemberQR extends AsyncTask<String, Void, String> {
+        @Override
+        protected String doInBackground(String[] params) {
+            // HTTPPOST to API
+            String response = null;
+            URL url = null;
+            try {
+                url = new URL("https://fyp.amazecraft.net/Api/Capture/Generate");
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            }
+
+            try {
+                HttpURLConnection con = (HttpURLConnection) url.openConnection();
+                con.setRequestMethod("POST");
+                con.setRequestProperty("Content-Type", "application/json");
+                con.setRequestProperty("Accept", "application/json");
+                con.setDoInput(true);
+
+                JSONObject json = new JSONObject();
+                json.put("type", "2");
+                json.put("sessionId", SessionService.getSessionId());
+                json.put("sessionKey", SessionService.getSessionKey());
+
+                OutputStreamWriter wr = new OutputStreamWriter(con.getOutputStream());
+                wr.write(json.toString());
+                wr.flush();
+
+                try(BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream(), "utf-8"))) {
+                    StringBuilder sb = new StringBuilder();
+                    String responseLine = null;
+                    while ((responseLine = br.readLine()) != null) {
+                        sb.append(responseLine.trim());
+                    }
+                    response = sb.toString();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (NetworkOnMainThreadException e) {
+                e.printStackTrace();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            return response;
+        }
+
+        @Override
+        protected void onPostExecute(String message) {
+            if (message != null) {
+                try {
+                    JSONObject obj = new JSONObject(message);
+                    String qrUrl = obj.getString("captureQR");
+                    InputStream is = null;
+                    is = (InputStream) new URL(qrUrl).getContent();
+                    PaymentService.setPaymentQRDrawable(Drawable.createFromStream(is, "src name"));
+                    qrImg.setImageDrawable(PaymentService.getPaymentQRDrawable());
+                    paymentInst.setText("Capture QR");
+                    paymentInst2.setText("To save your order detail.");
+                    txtAmount.setVisibility(View.INVISIBLE);
+                    qrImg.setVisibility(View.VISIBLE);
+                    captureDetailBtn.setVisibility(View.GONE);
+                } catch (JSONException | MalformedURLException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
                     e.printStackTrace();
                 }
             }

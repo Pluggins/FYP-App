@@ -346,10 +346,8 @@ public class CartFragment extends Fragment {
                     JSONArray jArray = obj.getJSONArray("items");
                     for (int i = 0; i < jArray.length() ; i++) {
                         JSONObject tmpObj = jArray.getJSONObject(i);
-                        if (tmpObj.getInt("status") == 1) {
-                            OrderMenuItem menuItem = new OrderMenuItem(tmpObj.getString("orderItemId"), tmpObj.getString("name"), tmpObj.getDouble("orderItemUnitPrice"), tmpObj.getInt("quantity"), tmpObj.getInt("status"));
-                            OrderService.addItem(menuItem);
-                        }
+                        OrderMenuItem menuItem = new OrderMenuItem(tmpObj.getString("orderItemId"), tmpObj.getString("name"), tmpObj.getDouble("orderItemUnitPrice"), tmpObj.getInt("quantity"), tmpObj.getInt("status"));
+                        OrderService.addItem(menuItem);
                     }
                     bar.setVisibility(View.GONE);
                     getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
