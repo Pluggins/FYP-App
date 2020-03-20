@@ -3,7 +3,7 @@ package com.example.myapplication.model;
 public class MemberOrder {
     private String orderId;
     private String orderDate;
-    private double price;
+    private String price;
 
     public String getOrderId() {
         return orderId;
@@ -21,11 +21,11 @@ public class MemberOrder {
         this.orderDate = orderDate;
     }
 
-    public double getPriceDisplay() {
+    public String getPriceDisplay() {
         return price;
     }
 
-    public void setPriceDisplay(double priceDisplay) {
+    public void setPriceDisplay(String priceDisplay) {
         this.price = priceDisplay;
     }
 }

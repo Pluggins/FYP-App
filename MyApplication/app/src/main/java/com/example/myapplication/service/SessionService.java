@@ -21,6 +21,7 @@ public class SessionService {
     private static Drawable QRLoginDrawable;
     private static String captureId;
     private static int type = 1;
+    // A member if qr login is scanned prior ordering
     private static boolean isMember = false;
     private static boolean newUser = true;
 

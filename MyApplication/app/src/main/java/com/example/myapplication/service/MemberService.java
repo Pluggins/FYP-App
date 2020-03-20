@@ -1,6 +1,7 @@
 package com.example.myapplication.service;
 
 import com.example.myapplication.model.MemberOrder;
+import com.example.myapplication.model.OrderMenuItem;
 
 import java.util.List;
 
@@ -8,7 +9,10 @@ public class MemberService {
     private static String email;
     private static String dateJoined;
     private static String name;
+    // A member consists of filled email, datejoined and name
+    private static Boolean isMember = false;
     private static List<MemberOrder> orders;
+    private static List<OrderMenuItem> orderItems;
 
     public static String getEmail() {
         return email;
@@ -40,5 +44,21 @@ public class MemberService {
 
     public static void setOrders(List<MemberOrder> orders) {
         MemberService.orders = orders;
+    }
+
+    public static Boolean isMember() {
+        return isMember;
+    }
+
+    public static void setIsMember(Boolean isMember) {
+        MemberService.isMember = isMember;
+    }
+
+    public static List<OrderMenuItem> getOrderItems() {
+        return orderItems;
+    }
+
+    public static void setOrderItems(List<OrderMenuItem> orderItems) {
+        MemberService.orderItems = orderItems;
     }
 }

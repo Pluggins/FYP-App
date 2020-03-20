@@ -13,6 +13,8 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.example.myapplication.model.MemberOrder;
+import com.example.myapplication.service.MemberService;
 import com.example.myapplication.service.MenuItemService;
 import com.example.myapplication.service.SessionService;
 import com.example.myapplication.service.UtilityService;
@@ -30,6 +32,8 @@ import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -38,6 +42,7 @@ public class MemberLogin extends AppCompatActivity {
     Button cancelBtn;
     int transactionStatus = 0;
     boolean stopLoading = false;
+    boolean lockBackButton = false;
     Timer timer;
 
     @Override
@@ -60,8 +65,10 @@ public class MemberLogin extends AppCompatActivity {
         timer = new Timer();
         TimerTask task = new TimerTask() {
                     public void run() {
-                        CheckCaptureStatus captureStatus = new CheckCaptureStatus();
-                        captureStatus.execute(SessionService.getCaptureId());
+                        if (!stopLoading) {
+                            CheckCaptureStatus captureStatus = new CheckCaptureStatus();
+                            captureStatus.execute(SessionService.getCaptureId());
+                        }
                     }
                 };
         timer.scheduleAtFixedRate(task, 2000,500);
@@ -69,8 +76,8 @@ public class MemberLogin extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        if (!stopLoading) {
-            stopLoading = true;
+        if (!lockBackButton) {
+            lockBackButton = true;
             timer.cancel();
             if (transactionStatus == 0) {
                 Intent intent = new Intent(getApplicationContext(), MainInit.class);
@@ -146,14 +153,101 @@ public class MemberLogin extends AppCompatActivity {
                     JSONObject obj = new JSONObject(message);
                     String status = obj.getString("status");
                     if (status.equals("SCANNED")) {
-                        SessionService.setIsMember(true);
                         SessionService.setTemporarySession(obj.getString("sessionId"),obj.getString("sessionKey"));
-                        transactionStatus = 2;
-                        onBackPressed();
+                        SessionService.setIsMember(true);
+                        stopLoading = true;
+                        timer.cancel();
+                        PopulateUserDetail populate = new PopulateUserDetail();
+                        populate.execute();
                     } else if (status.equals("EXPIRED")) {
                         transactionStatus = 1;
                         onBackPressed();
                     }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    private class PopulateUserDetail extends AsyncTask<String, Void, String> {
+        @Override
+        protected String doInBackground(String[] params) {
+            // HTTPPOST to API
+            String response = null;
+            URL url = null;
+            try {
+                url = new URL("https://fyp.amazecraft.net/Api/User/GetDetailBySessionId");
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            }
+
+            try {
+                HttpURLConnection con = (HttpURLConnection) url.openConnection();
+                con.setRequestMethod("POST");
+                con.setRequestProperty("Content-Type", "application/json");
+                con.setRequestProperty("Accept", "application/json");
+                con.setDoInput(true);
+
+                JSONObject json = new JSONObject();
+                json.put("sessionId", SessionService.getSessionId());
+                json.put("sessionKey", SessionService.getSessionKey());
+
+                OutputStreamWriter wr = new OutputStreamWriter(con.getOutputStream());
+                wr.write(json.toString());
+                wr.flush();
+
+                try(BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream(), "utf-8"))) {
+                    StringBuilder sb = new StringBuilder();
+                    String responseLine = null;
+                    while ((responseLine = br.readLine()) != null) {
+                        sb.append(responseLine.trim());
+                    }
+                    response = sb.toString();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (NetworkOnMainThreadException e) {
+                e.printStackTrace();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            return response;
+        }
+
+        @Override
+        protected void onPostExecute(String message) {
+            if (message != null) {
+                try {
+                    JSONObject obj = new JSONObject(message);
+                    List<MemberOrder> orders = new ArrayList<MemberOrder>();
+                    boolean isMember = obj.getBoolean("isMember");
+                    if (isMember) {
+                        MemberService.setName(obj.getString("userName"));
+                        MemberService.setEmail(obj.getString("userEmail"));
+                        MemberService.setDateJoined(obj.getString("dateJoined"));
+                        MemberService.setIsMember(true);
+                    } else {
+                        MemberService.setIsMember(false);
+                    }
+                    try {
+                        JSONArray ary = obj.getJSONArray("orders");
+                        for (int i = 0; i < ary.length(); i++) {
+                            JSONObject tmpObj = ary.getJSONObject(i);
+                            MemberOrder newOrder = new MemberOrder();
+                            newOrder.setOrderId(tmpObj.getString("orderId"));
+                            newOrder.setOrderDate(tmpObj.getString("orderDate"));
+                            newOrder.setPriceDisplay(tmpObj.getString("price"));
+                            orders.add(newOrder);
+                        }
+                        MemberService.setOrders(orders);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+                    transactionStatus = 2;
+                    onBackPressed();
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
