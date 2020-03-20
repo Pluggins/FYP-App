@@ -15,6 +15,7 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 
@@ -135,6 +136,9 @@ public class OrderAdapter extends ArrayAdapter<OrderMenuItem> {
                  */
 
                     //MenuItemService.addMenuItem();
+                } else {
+                    Toast toast = Toast.makeText(mContext, "Item has already been paid.", Toast.LENGTH_SHORT);
+                    toast.show();
                 }
             }
         });
