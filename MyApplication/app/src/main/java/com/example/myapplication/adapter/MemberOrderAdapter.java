@@ -157,7 +157,7 @@ public class MemberOrderAdapter extends ArrayAdapter<MemberOrder> {
                 }
             }
             ((Activity) mContext).getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-            pb.setVisibility(View.INVISIBLE);
+            pb.setVisibility(View.GONE);
             Intent intent = new Intent(mContext, MemberOrderItem.class);
             mContext.startActivity(intent);
         }

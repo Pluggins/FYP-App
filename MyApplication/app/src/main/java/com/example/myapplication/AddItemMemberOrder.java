@@ -11,10 +11,13 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.myapplication.model.MenuItem;
 import com.example.myapplication.service.CartService;
 import com.example.myapplication.service.MemberService;
 import com.example.myapplication.service.MenuItemService;
 import com.example.myapplication.service.SessionService;
+
+import java.math.BigDecimal;
 
 public class AddItemMemberOrder extends AppCompatActivity {
     EditText itemQuantity;
@@ -62,8 +65,12 @@ public class AddItemMemberOrder extends AppCompatActivity {
         submitBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                com.example.myapplication.model.MenuItem selectedItem = MenuItemService.retrieveItemById(MenuItemService.getSelectedMenuItemId());
-                CartService.addItem(selectedItem, Integer.parseInt(itemQuantity.getText().toString()));
+                MenuItem menuItem = new MenuItem();
+                menuItem.setName(MemberService.getSelectedItem().getItemName());
+                menuItem.setPrice(BigDecimal.valueOf(MemberService.getSelectedItem().getUnitPrice()));
+                menuItem.setDisplayPrice("Unit Price: RM" + String.format("%.2f", MemberService.getSelectedItem().getUnitPrice()));
+                menuItem.setId(MemberService.getSelectedItem().getMenuItemId());
+                CartService.addItem(menuItem, Integer.parseInt(itemQuantity.getText().toString()));
                 Intent intent = null;
                 if (SessionService.getType() == 1) {
                     intent = new Intent(getApplicationContext(), MainActivity.class);
@@ -72,6 +79,7 @@ public class AddItemMemberOrder extends AppCompatActivity {
                 }
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(intent);
+                finish();
                 Toast toast = Toast.makeText(getApplicationContext(), "Item has been added to cart.", Toast.LENGTH_SHORT);
                 toast.show();
             }
