@@ -19,9 +19,13 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 
+import com.example.myapplication.MemberOrderItem;
+import com.example.myapplication.OrderActivity;
 import com.example.myapplication.R;
 import com.example.myapplication.model.MemberOrder;
 import com.example.myapplication.model.MenuItem;
+import com.example.myapplication.model.OrderMenuItem;
+import com.example.myapplication.service.MemberService;
 import com.example.myapplication.service.MenuItemService;
 
 import org.json.JSONArray;
@@ -70,10 +74,16 @@ public class MemberOrderAdapter extends ArrayAdapter<MemberOrder> {
         v.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view) {
+                ((Activity) mContext).getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
+                        WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+                pb = view.getRootView().findViewById(R.id.member_progressbar);
+                pb.setVisibility(View.VISIBLE);
                 LoadOrderItem load = new LoadOrderItem();
                 load.execute(order.getOrderId());
             }
         });
+
+
 
         return v;
     }
@@ -127,28 +137,28 @@ public class MemberOrderAdapter extends ArrayAdapter<MemberOrder> {
         protected void onPostExecute(String message) {
             if (message != null) {
                 try {
+                    List<OrderMenuItem> orderItems = new ArrayList<OrderMenuItem>();
                     JSONObject obj = new JSONObject(message);
-                    JSONArray jArray = obj.getJSONArray("menuItemList");
+                    JSONArray jArray = obj.getJSONArray("items");
                     MenuItemService.clear();
                     for (int i = 0; i < jArray.length(); i++) {
                         JSONObject tmpObj = jArray.getJSONObject(i);
-                        MenuItem newMenuItem = new MenuItem();
-                        newMenuItem.setId(tmpObj.getString("id"));
-                        newMenuItem.setName(tmpObj.getString("name"));
-                        newMenuItem.setShortDesc(tmpObj.getString("shortDesc"));
-                        newMenuItem.setPrice(BigDecimal.valueOf(Double.parseDouble(tmpObj.getString("price"))));
-                        MenuItemService.addMenuItem(newMenuItem);
+                        OrderMenuItem newMenuItem = new OrderMenuItem();
+                        newMenuItem.setItemId(tmpObj.getString("orderItemId"));
+                        newMenuItem.setMenuItemId(tmpObj.getString("menuItemId"));
+                        newMenuItem.setItemName(tmpObj.getString("name"));
+                        newMenuItem.setUnitPrice(Double.parseDouble(tmpObj.getString("orderItemUnitPrice")));
+                        newMenuItem.setQuantity(tmpObj.getInt("quantity"));
+                        orderItems.add(newMenuItem);
                     }
-
-                    MenuItemService.setMenuName(obj.getString("menuName"));
-                    MenuItemService.setMenuId(obj.getString("menuId"));
+                    MemberService.setOrderItems(orderItems);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
             }
             ((Activity) mContext).getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-            pb.setVisibility(View.GONE);
-            Intent intent = new Intent(mContext, com.example.myapplication.MenuItem.class);
+            pb.setVisibility(View.INVISIBLE);
+            Intent intent = new Intent(mContext, MemberOrderItem.class);
             mContext.startActivity(intent);
         }
     }

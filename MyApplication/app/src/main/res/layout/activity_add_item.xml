@@ -59,7 +59,7 @@
 
     <TextView
         android:id="@+id/itemTitle"
-        android:layout_width="408dp"
+        android:layout_width="match_parent"
         android:layout_height="96dp"
         android:background="@drawable/top_title"
         android:gravity="center_vertical"

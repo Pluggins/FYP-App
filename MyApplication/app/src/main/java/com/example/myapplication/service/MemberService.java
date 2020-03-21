@@ -13,6 +13,7 @@ public class MemberService {
     private static Boolean isMember = false;
     private static List<MemberOrder> orders;
     private static List<OrderMenuItem> orderItems;
+    private static OrderMenuItem selectedItem;
 
     public static String getEmail() {
         return email;
@@ -60,5 +61,13 @@ public class MemberService {
 
     public static void setOrderItems(List<OrderMenuItem> orderItems) {
         MemberService.orderItems = orderItems;
+    }
+
+    public static OrderMenuItem getSelectedItem() {
+        return selectedItem;
+    }
+
+    public static void setSelectedItem(OrderMenuItem selectedItem) {
+        MemberService.selectedItem = selectedItem;
     }
 }

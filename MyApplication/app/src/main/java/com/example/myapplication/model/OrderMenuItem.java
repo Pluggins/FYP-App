@@ -2,11 +2,16 @@ package com.example.myapplication.model;
 
 public class OrderMenuItem {
     private String itemId;
+    private String menuItemId;
     private String itemName;
     private int status;
     private double unitPrice;
     private int quantity;
     private int selectedQuantity;
+
+    public OrderMenuItem() {
+
+    }
 
     public OrderMenuItem(String itemId, String itemName, double unitPrice, int quantity, int status) {
         this.itemId = itemId;
@@ -63,5 +68,13 @@ public class OrderMenuItem {
 
     public void setUnitPrice(double unitPrice) {
         this.unitPrice = unitPrice;
+    }
+
+    public String getMenuItemId() {
+        return menuItemId;
+    }
+
+    public void setMenuItemId(String menuItemId) {
+        this.menuItemId = menuItemId;
     }
 }

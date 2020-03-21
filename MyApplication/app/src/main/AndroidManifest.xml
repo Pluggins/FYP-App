@@ -11,13 +11,17 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MemberOrderItem"></activity>
+        <activity android:name=".MemberOrderItem"
+            android:label="Order Summary"></activity>
         <activity
             android:name=".PaymentQR"
             android:label="Order Payment" />
         <activity
             android:name=".OrderActivity"
             android:label="Order Summary" />
+        <activity
+            android:name=".AddItemMemberOrder"
+            android:label="Add To Cart" />
         <activity
             android:name=".MainActivityMember"
             android:label="Member" />

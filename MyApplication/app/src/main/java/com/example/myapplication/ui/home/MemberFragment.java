@@ -32,7 +32,7 @@ public class MemberFragment extends Fragment {
     private TextView email;
     private TextView joinedDate;
     private ListView listView;
-    private FrameLayout memberConstraint;
+    private ConstraintLayout memberConstraint;
     private ArrayList<MemberOrder> memberOrders = (ArrayList<MemberOrder>) MemberService.getOrders();
     private MemberOrderAdapter aAdapter;
 
@@ -53,7 +53,7 @@ public class MemberFragment extends Fragment {
         fullName = (TextView) root.findViewById(R.id.memberFullname);
         email = (TextView) root.findViewById(R.id.memberEmail);
         joinedDate = (TextView) root.findViewById(R.id.memberJoinedSince);
-        memberConstraint = (FrameLayout) root.findViewById(R.id.memberConstraint);
+        memberConstraint = (ConstraintLayout) root.findViewById(R.id.memberConstraint);
         if (!MemberService.isMember()) {
             memberConstraint.setVisibility(View.GONE);
         } else {
