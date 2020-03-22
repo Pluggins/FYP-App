@@ -23,6 +23,9 @@
             android:name=".AddItemMemberOrder"
             android:label="Add To Cart" />
         <activity
+            android:name=".AddItemCart"
+            android:label="Edit Quantity" />
+        <activity
             android:name=".MainActivityMember"
             android:label="Member" />
         <activity android:name=".MemberLogin" />

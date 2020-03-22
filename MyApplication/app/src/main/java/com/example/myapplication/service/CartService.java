@@ -9,6 +9,7 @@ import java.util.List;
 
 public class CartService {
     private static List<CartItem> itemList = new ArrayList<CartItem>();
+    private static CartItem selectedItem;
 
     public static void addItem(MenuItem menuItem, int quantity) {
         boolean changed = false;
@@ -50,5 +51,13 @@ public class CartService {
 
     public static int getItemCount() {
         return itemList.size();
+    }
+
+    public static CartItem getSelectedItem() {
+        return selectedItem;
+    }
+
+    public static void setSelectedItem(CartItem selectedItem) {
+        CartService.selectedItem = selectedItem;
     }
 }

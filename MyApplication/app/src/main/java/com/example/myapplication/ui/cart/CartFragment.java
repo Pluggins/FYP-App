@@ -20,6 +20,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
@@ -61,13 +62,14 @@ import java.util.Set;
 public class CartFragment extends Fragment {
 
     private CartViewModel cartViewModel;
-    private ListView listView;
-    private ArrayAdapter aAdapter;
+    private static ListView listView;
+    private static ArrayAdapter aAdapter;
     private ArrayList<CartItem> cartItems = (ArrayList<CartItem>) CartService.retrieveCartItems();
     private FloatingActionButton fab;
     private DialogInterface.OnClickListener dialogClickListener = null;
-    private View root;
+    private static View root;
     private ProgressBar bar;
+    private static FragmentActivity activity;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -80,7 +82,7 @@ public class CartFragment extends Fragment {
             }
         });
         setHasOptionsMenu(true);
-
+        activity = getActivity();
         bar = (ProgressBar) root.findViewById(R.id.cart_progressbar);
         dialogClickListener = new DialogInterface.OnClickListener() {
             @Override
@@ -358,5 +360,15 @@ public class CartFragment extends Fragment {
                 e.printStackTrace();
             }
         }
+    }
+
+    public static FragmentActivity getThisActivity() {
+        return activity;
+    }
+
+    public static void resetAdapter() {
+        aAdapter = new CartAdapter((ArrayList<CartItem>)CartService.retrieveCartItems(), CartFragment.getThisActivity());
+        listView = (ListView) root.findViewById(R.id.cartListView);
+        listView.setAdapter(aAdapter);
     }
 }

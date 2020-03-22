@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
+import com.example.myapplication.AddItemCart;
 import com.example.myapplication.R;
 import com.example.myapplication.model.CartItem;
 import com.example.myapplication.model.Menu;
@@ -46,7 +47,7 @@ public class CartAdapter extends ArrayAdapter<CartItem> {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         View v = convertView;
-        CartItem cartItem = getItem(position);
+        final CartItem cartItem = getItem(position);
 
         if (v == null) {
             LayoutInflater vi;
@@ -64,13 +65,15 @@ public class CartAdapter extends ArrayAdapter<CartItem> {
             txtTotal.setText("RM"+String.format("%.2f",cartItem.getMenuItem().getPrice().doubleValue() * cartItem.getQuantity()));
             txtQuantity.setText(String.valueOf(cartItem.getQuantity()));
         }
+
         v.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view) {
-                //MenuItemService.addMenuItem();
+                CartService.setSelectedItem(cartItem);
+                Intent intent = new Intent(mContext, AddItemCart.class);
+                mContext.startActivity(intent);
             }
         });
-
         return v;
     }
 
