@@ -7,7 +7,7 @@
 *.rsuser
 *.suo
 *.user
-*.userosscache
+*.userosscaches
 *.sln.docstates
 
 # User-specific files (MonoDevelop/Xamarin Studio)
